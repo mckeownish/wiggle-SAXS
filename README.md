@@ -2,7 +2,7 @@
 
 **Implicit SAXS modelling of coarse-grain protein structures using implicitly hydrated form factors.**
 
-wiggle-SAXS computes theoretical SAXS curves directly from CA position in PDB files or numpy arrays using a two body model approximating side chain centre of masses from CAs and pre-fitted implicitly hydrated form factors.
+wiggle-SAXS computes theoretical SAXS curves directly from CA position in PDB files or numpy arrays, using a two body model approximating side chain centre of masses from CAs and pre-fitted implicitly hydrated form factors.
 
 ---
 
@@ -87,7 +87,7 @@ wiggle --pdb protein.pdb --saxs data.dat
 Output is written to `wiggle_fit.dat` by default. Use `--out` to specify a path:
 
 ```bash
-wiggle --pdb protein.pdb --saxs data.dat --out results/lysozyme_fit.dat
+wiggle --pdb protein.pdb --saxs data.dat --out results/wiggle_fit.dat
 ```
 
 Custom form factors:
