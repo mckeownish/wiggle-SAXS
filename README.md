@@ -1,6 +1,6 @@
 # wiggle-SAXS
 
-**Implicit SAXS modelling of coarse-grain protein structures using implicitly hydrated form factors.**
+**SAXS modelling of coarse-grain protein structures using implicitly hydrated form factors.**
 
 wiggle-SAXS computes theoretical SAXS curves directly from CA position in PDB files or numpy arrays, using a two body model approximating side chain centre of masses from CAs and pre-fitted implicitly hydrated form factors.
 
