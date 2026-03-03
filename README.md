@@ -1,59 +1,128 @@
-# wiggle
+# wiggle-SAXS
 
-**Implicit SAXS modelling from protein structures using hydrated form factors.**
+**Implicit SAXS modelling of coarse-grain protein structures using implicitly hydrated form factors.**
 
-Carbonara computes a theoretical SAXS curve directly from a PDB file by
-placing implicit scattering centres (backbone + side-chain COMs) and
-evaluating the Debye sum with pre-fitted hydrated form factors — no explicit
-solvent simulation required.
+wiggle-SAXS computes theoretical SAXS curves directly from CA position in PDB files or numpy arrays using a two body model approximating side chain centre of masses from CAs and pre-fitted implicitly hydrated form factors.
 
 ---
 
 ## Installation
 
 ```bash
-pip install wiggle
+pip install wiggle-SAXS
 ```
 
 Or for development (editable install with dev extras):
 
 ```bash
-git clone https://github.com/yourusername/wiggle
-cd wiggle
+git clone https://github.com/mckeownish/wiggle-SAXS.git
+cd wiggle-SAXS
 pip install -e ".[dev]"
 ```
 
 ---
 
+
 ## Quick start
 
+### From a PDB file
+
 ```python
-import numpy as np
 import wiggle
 
-# 1. Load your form factors (hydrated, pre-fitted)
-ff = wiggle.load_form_factors("my_form_factors.pkl")
+# compute model curve from PDB + experimental SAXS data
+result = wiggle.compute_fit("data/lysozyme.pdb", "data/lyso_SAXS.dat")
 
-# 2. Process a PDB file into implicit scattering centres
-proc = wiggle.StructureProcessor()
-data = proc.process("my_protein.pdb")
+# fit to data
+fit = wiggle.fit_model_to_data(
+    result["q_model"], result["I_model"],
+    result["q_exp"],   result["I_exp"], result["I_err"],
+)
+print(f"chi2 = {fit['chi2']:.3f}")
 
-# 3. Compute I(q)
-q, I_q = wiggle.calculate_saxs(data, ff)
-
-# 4. Fit to experimental data
-#    q_exp, I_exp, I_err loaded from your .dat file
-result = wiggle.fit_model_to_data(q, I_q, q_exp, I_exp, I_err)
-print(f"chi2 = {result['chi2']:.3f}")
-
-# 5. Plot
+# plot
 wiggle.plot_fit(
-    q_exp, I_exp, I_err,
-    result["q"], result["I_scaled"],
-    chi2=result["chi2"],
-    title="My protein",
+    result["q_exp"], result["I_exp"], result["I_err"],
+    fit["q"], fit["I_scaled"],
+    chi2=fit["chi2"],
+    title="Lysozyme SAXS Fit",
     save_path="fit.svg",
 )
+```
+
+### From numpy arrays (e.g. MD trajectories)
+
+```python
+import wiggle
+
+proc = wiggle.StructureProcessor()
+
+# sequence accepts one-letter string or list of three-letter codes
+structure = proc.process_from_arrays(ca_coords, sequence)
+
+# multi-chain example — pass chain_ids matching length of ca_coords
+# chain_ids = np.array(["A"] * 129 + ["B"] * 129)
+# structure = proc.process_from_arrays(ca_coords, sequence, chain_ids=chain_ids)
+
+q, I_q = wiggle.calculate_saxs(structure)
+
+fit = wiggle.fit_model_to_data(q, I_q, q_exp, I_exp, I_err)
+print(f"chi2 = {fit['chi2']:.3f}")
+
+wiggle.plot_fit(
+    q_exp, I_exp, I_err,
+    fit["q"], fit["I_scaled"],
+    chi2=fit["chi2"],
+    title="My protein",
+    save_path=None,
+)
+```
+
+### Command line
+
+```bash
+wiggle --pdb protein.pdb --saxs data.dat
+```
+
+Output is written to `wiggle_fit.dat` by default. Use `--out` to specify a path:
+
+```bash
+wiggle --pdb protein.pdb --saxs data.dat --out results/lysozyme_fit.dat
+```
+
+Custom form factors:
+
+```bash
+wiggle --pdb protein.pdb --saxs data.dat --ff my_form_factors.pkl --out fit.dat
+```
+
+The output file contains a header with fit metadata followed by four columns:
+
+```
+# wiggle fit
+# pdb:   protein.pdb
+# saxs:  data.dat
+# chi2:  1.2345
+# scale: 3.141593e+04
+# q_exp  I_exp  I_err  I_model
+8.71252000e-02   4.00680000e+00   1.03361000e+01   3.98123000e+00
+...
+```
+
+---
+
+## Package layout
+
+```
+wiggle/
+├── api.py         # high-level convenience functions (compute_fit)
+├── cli.py         # command-line entry point
+├── structure.py   # PDB parsing, chain fixing, geometric vector + side-chain placement
+├── scattering.py  # Debye SAXS calculation with implicit form factors
+├── fitting.py     # chi-squared optimisation and interpolation utilities
+├── plotting.py    # matplotlib fit visualisation with residuals panel
+└── data/
+    └── wiggle_implicit_form_factors.pkl
 ```
 
 ---
@@ -75,16 +144,6 @@ wiggle/
 ```bash
 pytest
 ```
-
----
-
-## Form factors
-
-Form factors are stored as a `dict[str, np.ndarray]` pickled to disk.
-Keys are scattering centre labels: `"BB"` (backbone), plus three-letter
-residue codes for side-chain centres (e.g. `"ARG"`, `"LEU"`, ...).
-All arrays must share the same length `N`, representing f(q) sampled on a
-uniform grid from `q=0` to `q=(N-1)/100` Å⁻¹.
 
 ---
 
