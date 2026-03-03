@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wiggle"
+version = "0.1.0"
+description = "Implicit SAXS modelling from protein structures using hydrated form factors"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Josh McKeown" },
+]
+keywords = ["SAXS", "protein", "structural biology", "scattering", "biophysics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "biopandas>=0.4",
+    "matplotlib>=3.7",
+    "statsmodels>=0.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+[project.scripts]
+wiggle = "wiggle.cli:main"
+
+[project.urls]
+Repository = "https://github.com/yourusername/wiggle"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["wiggle*"]
+
+[tool.setuptools.package-data]
+wiggle = ["data/*.pkl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
