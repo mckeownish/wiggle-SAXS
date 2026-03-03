@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wiggle"
+name = "wiggle-SAXS"
 version = "0.1.0"
-description = "Implicit SAXS modelling from protein structures using hydrated form factors"
+description = "SAXS modelling from protein structures using hydrated form factors"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
@@ -41,7 +41,7 @@ dev = [
 wiggle = "wiggle.cli:main"
 
 [project.urls]
-Repository = "https://github.com/yourusername/wiggle"
+Repository = "https://github.com/mckeownish/wiggle-SAXS.git"
 
 [tool.setuptools.packages.find]
 where = ["."]
